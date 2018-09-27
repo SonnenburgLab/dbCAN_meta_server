@@ -27,6 +27,7 @@ parser.add_argument('--cluster', '-c', action='store_true', help='Predict CGCs v
 parser.add_argument('--gff', help='Auxiliary locations file. Required if a protein input is being used.')
 parser.add_argument('--dia_eval', default=1e-102,type=float, help='DIAMOND E Value. Default: 1e-102')
 parser.add_argument('--dia_cpu', default=5, type=int, help='Number of CPU cores that DIAMOND is allowed to use. Default: 5')
+parser.add_argument('--sensitive', action='store_true', help='Run DIAMOND in sensitive mode. This will take longer but is recommended by DIAMOND developers.')
 parser.add_argument('--hmm_eval', default=1e-15, type=float, help='HMMER E Value. Default: 1e-15')
 parser.add_argument('--hmm_cov', default=0.35, type=float, help='HMMER Coverage value. Default: 0.35')
 parser.add_argument('--hmm_cpu', default=1, type=int, help='Number of CPU cores that HMMER is allowed to use. Default: 1')
@@ -94,6 +95,9 @@ if args.tools != 'all':
 		tools[1] = False
 	if 'hotpep' not in args.tools:
 		tools[2] = False
+sens = ""
+if args.sensitive:
+    sens = '--sensitive'
 
 # End Setup and Input Checks
 #########################
@@ -124,7 +128,7 @@ signalpneg = Popen('signalp -t gram- '+outDir+prefix+'uniInput > '+outDir+prefix
 # Begin Core Tools
 
 if tools[0]:
-	diamond = Popen(['diamond', 'blastp', '-d', dbDir+'CAZy.dmnd', '-e', str(args.dia_eval), '-q', outDir+prefix+'uniInput', '-k', '1', '-p', str(args.dia_cpu), '-o', outDir+prefix+'diamond.out', '-f', '6'])
+	diamond = Popen(['diamond', 'blastp', '-d', dbDir+'CAZy.dmnd', '-e', str(args.dia_eval), '-q', outDir+prefix+'uniInput', '-k', '1', '-p', str(args.dia_cpu), '-o', outDir+prefix+'diamond.out', '-f', '6', sens])
 
 if tools[1]:
 	hmmer = Popen(['hmmscan', '--domtblout', outDir+prefix+'h.out', '--cpu', str(args.hmm_cpu), '-o', '/dev/null', dbDir+'dbCAN.txt', outDir+prefix+'uniInput'])
@@ -204,8 +208,8 @@ if find_clusters:
 ########################
 # Begin TF and TP prediction
 
-	call(['diamond', 'blastp', '-d', dbDir+'tf.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tf.out', '-f', '6'])
-	call(['diamond', 'blastp', '-d', dbDir+'tcdb.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tp.out', '-f', '6'])
+	call(['diamond', 'blastp', '-d', dbDir+'tf.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tf.out', '-f', '6', sens])
+	call(['diamond', 'blastp', '-d', dbDir+'tcdb.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tp.out', '-f', '6', sens])
 	tp = set()
 	tf = set()
 	tp_genes = {}
