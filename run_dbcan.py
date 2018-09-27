@@ -23,21 +23,22 @@ parser = argparse.ArgumentParser(description='dbCAN2 Driver Script')
 
 parser.add_argument('inputFile', help='User input file. Must be in FASTA format.')
 parser.add_argument('inputType', choices=['protein', 'prok', 'meta'], help='Type of sequence input. protein=proteome; prok=prokaryote; meta=metagenome') #protein=proteome, prok=prokaryote nucleotide, meta=metagenome nucleotide
-parser.add_argument('--cluster', '-c', help='Predict CGCs via CGCFinder. This argument requires an auxillary locations file if a protein input is being used')
-parser.add_argument('--dia_eval', default=1e-121,type=float, help='DIAMOND E Value')
-parser.add_argument('--dia_cpu', default=5, type=int, help='Number of CPU cores that DIAMOND is allowed to use')
-parser.add_argument('--hmm_eval', default=1e-15, type=float, help='HMMER E Value')
-parser.add_argument('--hmm_cov', default=0.35, type=float, help='HMMER Coverage value')
-parser.add_argument('--hmm_cpu', default=1, type=int, help='Number of CPU cores that HMMER is allowed to use')
-parser.add_argument('--hotpep_hits', default=4, type=int, help='Hotpep Hit value')
-parser.add_argument('--hotpep_freq', default=2.0, type=float, help='Hotpep Frequency value')
-parser.add_argument('--hotpep_cpu', default=4, type=int, help='Number of CPU cores that Hotpep is allowed to use')
+parser.add_argument('--cluster', '-c', action='store_true', help='Predict CGCs via CGCFinder.')
+parser.add_argument('--gff', help='Auxiliary locations file. Required if a protein input is being used.')
+parser.add_argument('--dia_eval', default=1e-102,type=float, help='DIAMOND E Value. Default: 1e-102')
+parser.add_argument('--dia_cpu', default=5, type=int, help='Number of CPU cores that DIAMOND is allowed to use. Default: 5')
+parser.add_argument('--hmm_eval', default=1e-15, type=float, help='HMMER E Value. Default: 1e-15')
+parser.add_argument('--hmm_cov', default=0.35, type=float, help='HMMER Coverage value. Default: 0.35')
+parser.add_argument('--hmm_cpu', default=1, type=int, help='Number of CPU cores that HMMER is allowed to use. Default: 1')
+parser.add_argument('--hotpep_hits', default=6, type=int, help='Hotpep Hit value. Default: 6')
+parser.add_argument('--hotpep_freq', default=2.6, type=float, help='Hotpep Frequency value. Default: 2.6')
+parser.add_argument('--hotpep_cpu', default=4, type=int, help='Number of CPU cores that Hotpep is allowed to use. Default: 4')
 parser.add_argument('--out_pre', default="", help='Output files prefix')
 parser.add_argument('--out_dir', default="", help='Output directory')
-parser.add_argument('--db_dir', default="db/", help='Database directory')
-parser.add_argument('--cgc_dis', default=2, help='CGCFinder Distance value')
-parser.add_argument('--cgc_sig_genes', default='tp', choices=['tp', 'tf','all'], help='CGCFinder Signature Genes value')
-parser.add_argument('--tools', '-t', nargs='+', choices=['hmmer', 'diamond', 'hotpep', 'all'], default='all', help='Choose a combination of tools to run')
+parser.add_argument('--db_dir', default="db/", help='Database directory. Default: db/')
+parser.add_argument('--cgc_dis', default=2, help='CGCFinder Distance value. Default: 2')
+parser.add_argument('--cgc_sig_genes', default='tp', choices=['tp', 'tf','all'], help='CGCFinder Signature Genes value. Default: tp')
+parser.add_argument('--tools', '-t', nargs='+', choices=['hmmer', 'diamond', 'hotpep', 'all'], default='all', help='Choose a combination of tools to run. Default: all')
 
 args = parser.parse_args()
 
@@ -55,9 +56,8 @@ auxFile = ""
 input = args.inputFile
 inputType = args.inputType
 find_clusters = False
-if args.cluster != None:
+if args.cluster:
 	find_clusters = True
-	auxFile = args.cluster
 if not dbDir.endswith("/") and len(dbDir) > 0:
 	dbDir += "/"
 if not os.path.isdir(dbDir):
@@ -74,6 +74,11 @@ if not outDir.endswith("/") and len(outDir) > 0:
 if not os.path.isdir(outDir):
 	call(['mkdir', outDir])
 if find_clusters and inputType == "protein":
+	if args.gff is None:
+		print("ERROR: You must provide a GFF or BED file if your input is a proteins FASTA file, or else you must not request --cluster!")
+		exit()
+	else:
+		auxFile = args.gff
 	if len(auxFile) > 0:
 		if not os.path.isfile(auxFile):
 				print("ERROR: It seems that the auxillary filename that you provided does not exist, or is not a file")
