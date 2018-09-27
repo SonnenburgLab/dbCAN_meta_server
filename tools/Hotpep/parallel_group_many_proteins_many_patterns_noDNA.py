@@ -4,6 +4,8 @@ import sys
 import natsort
 import os
 
+hotpep_dir = os.path.abspath(os.path.dirname(sys.argv[0]))+"/"
+
 protein_dir_name = ("fungus_fungus")
 if len(sys.argv) > 2:
 	protein_dir_name = sys.argv[2].replace("?", " ")
@@ -49,7 +51,7 @@ var1 = 1
 varlist = " ".join(str(x) for x in variables)
 pool = ThreadPool(threads)
 while var1 <= threads:
-	args_array.append(("python bact_group_many_proteins_many_patterns.py "+ str(var1) + " " + varlist))
+	args_array.append(("python "+hotpep_dir+"bact_group_many_proteins_many_patterns.py "+ str(var1) + " " + varlist))
 	var1 += 1
 pool.map(callCustom, args_array)
 

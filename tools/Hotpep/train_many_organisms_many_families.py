@@ -17,6 +17,9 @@ hit_cut_off = 3 #number of conserved peptides necessary to classify a protein
 freq_cut_off = 1.0 #minimum sum of frequencies necessary to classify a protein
 list_multidomain_enzymes = "no"
 
+hotpep_dir = os.path.abspath(os.path.dirname(sys.argv[0]))+"/"
+#print(hotpep_dir)
+
 if len(sys.argv) > 1:
 	organism_array = [sys.argv[1]]
 if len(sys.argv) > 2:
@@ -32,9 +35,9 @@ for protein_dir_name in organism_array:
 	print("Screening "+protein_dir_name+" for")
 	for cazy_class in cazyme_array:
 		print(cazy_class)
-		peptide_dir_name = "CAZY_PPR_patterns/"+cazy_class
+		peptide_dir_name = hotpep_dir+"CAZY_PPR_patterns/"+cazy_class
 		variables =  [threads, protein_dir_name, peptide_dir_name, peptide_length, hit_cut_off, freq_cut_off]
-		call("python parallel_group_many_proteins_many_patterns_noDNA.py "+" ".join(str(x) for x in variables), shell=True)
+		call("python "+hotpep_dir+"parallel_group_many_proteins_many_patterns_noDNA.py "+" ".join(str(x) for x in variables), shell=True)
 		#call(["python", "add_functions_orf.py", protein_dir_name, peptide_dir_name])
 		var1 = 1
 		while var1 <= threads:
@@ -45,6 +48,6 @@ for protein_dir_name in organism_array:
 			var1 += 1
 			
 	if list_multidomain_enzymes == "yes":
-		call("python list_multidomain_proteins.py "+protein_dir_name+" "+"_".join(cazyme_array), shell=True)
+		call("python "+hotpep_dir+"list_multidomain_proteins.py "+protein_dir_name+" "+"_".join(cazyme_array), shell=True)
 print("\nScreened\n"+"\n".join(organism_array))
 print("for proteins of the types\n"+", ".join(cazyme_array))

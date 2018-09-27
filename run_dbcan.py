@@ -35,8 +35,9 @@ parser.add_argument('--hotpep_hits', default=6, type=int, help='Hotpep Hit value
 parser.add_argument('--hotpep_freq', default=2.6, type=float, help='Hotpep Frequency value. Default: 2.6')
 parser.add_argument('--hotpep_cpu', default=4, type=int, help='Number of CPU cores that Hotpep is allowed to use. Default: 4')
 parser.add_argument('--out_pre', default="", help='Output files prefix')
-parser.add_argument('--out_dir', default="", help='Output directory')
-parser.add_argument('--db_dir', default="db/", help='Database directory. Default: db/')
+parser.add_argument('--out_dir', required=True, help='Output directory')
+parser.add_argument('--db_dir', default=os.path.abspath(os.path.dirname(sys.argv[0]))+"/db/", help='Database directory. Default: db/')
+parser.add_argument('--tools_dir', default=os.path.abspath(os.path.dirname(sys.argv[0]))+"/tools/", help='Tools directory. Default: tools/')
 parser.add_argument('--cgc_dis', default=2, help='CGCFinder Distance value. Default: 2')
 parser.add_argument('--cgc_sig_genes', default='tp', choices=['tp', 'tf','all'], help='CGCFinder Signature Genes value. Default: tp')
 parser.add_argument('--tools', '-t', nargs='+', choices=['hmmer', 'diamond', 'hotpep', 'all'], default='all', help='Choose a combination of tools to run. Default: all')
@@ -51,6 +52,7 @@ args = parser.parse_args()
 # Begin Setup and Input Checks
 
 dbDir = args.db_dir
+toolsDir = args.tools_dir
 prefix = args.out_pre
 outDir = args.out_dir
 auxFile = ""
@@ -61,6 +63,8 @@ if args.cluster:
 	find_clusters = True
 if not dbDir.endswith("/") and len(dbDir) > 0:
 	dbDir += "/"
+if not toolsDir.endswith("/") and len(toolsDir) > 0:
+	toolsDir += "/"
 if not os.path.isdir(dbDir):
 	print(dbDir , "ERROR: The database directory does not exist")
 	exit()
@@ -69,6 +73,12 @@ if not os.path.isfile(dbDir+'CAZy.dmnd'):
 	exit()
 if not os.path.isfile(dbDir+'dbCAN.txt'):
 	print("ERROR: No dbCAN HMM database found. Please make sure that your dbCAN HMM database is named 'dbCAN.txt', has been through hmmpress, and is located in your database directory")
+	exit()
+if not os.path.isdir(toolsDir):
+	print(dbDir , "ERROR: The tools directory does not exist")
+	exit()
+if not os.path.isfile(toolsDir+'hmmscan-parser.py'):
+	print("ERROR: The script hmmscan-parser.py cannot be found in your tools directory. Please make sure all scripts are present befoe running run_dbcan.py.")
 	exit()
 if not outDir.endswith("/") and len(outDir) > 0:
 	outDir += "/"
@@ -95,9 +105,6 @@ if args.tools != 'all':
 		tools[1] = False
 	if 'hotpep' not in args.tools:
 		tools[2] = False
-sens = ""
-if args.sensitive:
-    sens = '--sensitive'
 
 # End Setup and Input Checks
 #########################
@@ -106,7 +113,7 @@ if args.sensitive:
 if inputType == 'prok':
     call(['prodigal', '-i', input, '-a', outDir+prefix+'uniInput', '-o', outDir+prefix+'prodigal.gff', '-f', 'gff', '-q'])
 if inputType == 'meta':
-    call(['FragGeneScan1.30/run_FragGeneScan.pl', '-genome='+input, '-out='+outDir+prefix+'fragGeneScan', '-complete=1', '-train=complete', '-thread=10'])
+    call(['FragGeneScan', '-genome='+input, '-out='+outDir+prefix+'fragGeneScan', '-complete=1', '-train=complete', '-thread=10'])
 
 #Frag Gene Scan
 if inputType == 'meta':
@@ -128,8 +135,10 @@ signalpneg = Popen('signalp -t gram- '+outDir+prefix+'uniInput > '+outDir+prefix
 # Begin Core Tools
 
 if tools[0]:
-	diamond = Popen(['diamond', 'blastp', '-d', dbDir+'CAZy.dmnd', '-e', str(args.dia_eval), '-q', outDir+prefix+'uniInput', '-k', '1', '-p', str(args.dia_cpu), '-o', outDir+prefix+'diamond.out', '-f', '6', sens])
-
+	if args.sensitive:
+		diamond = Popen(['diamond', 'blastp', '-d', dbDir+'CAZy.dmnd', '-e', str(args.dia_eval), '-q', outDir+prefix+'uniInput', '-k', '1', '-p', str(args.dia_cpu), '-o', outDir+prefix+'diamond.out', '--sensitive', '-f', '6'])
+	else:
+		diamond = Popen(['diamond', 'blastp', '-d', dbDir+'CAZy.dmnd', '-e', str(args.dia_eval), '-q', outDir+prefix+'uniInput', '-k', '1', '-p', str(args.dia_cpu), '-o', outDir+prefix+'diamond.out', '-f', '6'])
 if tools[1]:
 	hmmer = Popen(['hmmscan', '--domtblout', outDir+prefix+'h.out', '--cpu', str(args.hmm_cpu), '-o', '/dev/null', dbDir+'dbCAN.txt', outDir+prefix+'uniInput'])
 
@@ -137,11 +146,11 @@ if tools[2]:
 	count = int(check_output("tr -cd '>' < "+outDir+prefix+"uniInput | wc -c", shell=True))    #number of genes in input file
 	numThreads = args.hotpep_cpu    														#number of cores for Hotpep to use
 	count_per_file = count/numThreads														#number of genes per core
-	directory = input.split('.')[0]
-	call(['mkdir','-m','777','Hotpep/'+directory])
+	#directory = input.split('.')[0]
+	call(['mkdir','-p','-m','777',outDir+'/Hotpep'])
 	num_files = 1
 	num_genes = 0
-	out = open("Hotpep/"+directory+"/orfs"+str(num_files)+".txt", 'w')
+	out = open(outDir+"/Hotpep/orfs"+str(num_files)+".txt", 'w')
 	with open(outDir+prefix+'uniInput', 'r') as f:
 		for line in f:
 			if line.startswith(">"):
@@ -150,15 +159,15 @@ if tools[2]:
 					out.close()
 					num_files += 1
 					num_genes = 0
-					out = open("Hotpep/"+directory+"/orfs"+str(num_files)+".txt", 'w')
+					out = open(outDir+"/Hotpep/orfs"+str(num_files)+".txt", 'w')
 			out.write(line)
 				
-	os.chdir('Hotpep/')
-	hotpep = Popen(['python', 'train_many_organisms_many_families.py', directory, str(numThreads), str(args.hotpep_hits), str(args.hotpep_freq)])
-	os.chdir('../')
+	#os.chdir('Hotpep/')
+	hotpep = Popen(['python', toolsDir+'Hotpep/train_many_organisms_many_families.py', outDir+"Hotpep/", str(numThreads), str(args.hotpep_hits), str(args.hotpep_freq)])
+	#os.chdir('../')
 	hotpep.wait()
 
-	hotpepDir = 'Hotpep/'+directory
+	hotpepDir = outDir+"Hotpep/"
 	call(['cp', hotpepDir+'/Results/output.txt', outDir+prefix+'Hotpep.out'])
 
 if tools[0]:
@@ -170,7 +179,7 @@ if tools[1]:
 	hmmer.wait()
 	print("HMMER complete")
 
-	call('python hmmscan-parser.py '+outDir+prefix+'h.out '+str(args.hmm_eval)+' '+str(args.hmm_cov)+' > '+outDir+prefix+'hmmer.out', shell=True)
+	call('python '+toolsDir+'hmmscan-parser.py '+outDir+prefix+'h.out '+str(args.hmm_eval)+' '+str(args.hmm_cov)+' > '+outDir+prefix+'hmmer.out', shell=True)
 	call(['rm', outDir+prefix+'h.out'])
 
 # End Core Tools
@@ -207,9 +216,12 @@ if find_clusters:
 
 ########################
 # Begin TF and TP prediction
-
-	call(['diamond', 'blastp', '-d', dbDir+'tf.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tf.out', '-f', '6', sens])
-	call(['diamond', 'blastp', '-d', dbDir+'tcdb.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tp.out', '-f', '6', sens])
+	if args.sensitive:
+		call(['diamond', 'blastp', '-d', dbDir+'tf.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tf.out', '--sensitive', '-f', '6'])
+		call(['diamond', 'blastp', '-d', dbDir+'tcdb.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tp.out', '--sensitive', '-f', '6'])
+	else:
+		call(['diamond', 'blastp', '-d', dbDir+'tf.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tf.out', '-f', '6'])
+		call(['diamond', 'blastp', '-d', dbDir+'tcdb.dmnd', '-e', '1e-10', '-q', outDir+prefix+'uniInput', '-k', '1', '-p', '1', '-o', outDir+prefix+'tp.out', '-f', '6'])
 	tp = set()
 	tf = set()
 	tp_genes = {}
@@ -387,7 +399,7 @@ if find_clusters:
 ####################
 # Begin CGCFinder call
 
-	call(['python', 'CGCFinder.py', outDir+prefix+'cgc.gff', '-o', outDir+prefix+'cgc.out', '-s', args.cgc_sig_genes, '-d', str(args.cgc_dis)])
+	call(['python', toolsDir+'CGC-Finder/CGCFinder.py', outDir+prefix+'cgc.gff', '-o', outDir+prefix+'cgc.out', '-s', args.cgc_sig_genes, '-d', str(args.cgc_dis)])
 
 # End CGCFinder call
 # End CGCFinder

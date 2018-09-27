@@ -150,5 +150,5 @@ with open(outf_name, 'w') as out:
 					out.write(group_score_array[-1][2]+'\n')
 					protein_hits += 1
 					
-call(['cp', outf_name, 'temp'])
+#call(['cp', outf_name, 'temp'])
 			
