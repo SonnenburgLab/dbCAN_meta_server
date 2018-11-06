@@ -48,7 +48,7 @@ anvi-get-sequences-for-gene-calls -c CONTIGS.db --get-aa-sequences -o proteins.f
 ```
 dbCAN_meta_server commands:
 ```
-python /path/to/anvi-script-anvi-script-convert-genecalls-to-gff.py gene_calls.txt
+python /path/to/anvi-script-convert-genecalls-to-gff.py gene_calls.txt
 python /path/to/run_dbcan.py --cluster --gff gene_calls.txt.gff --out_dir dbcan_output proteins.faa protein
 python /path/to/anvi-script-convert-dbCAN-to-functions.py dbcan_output (--export_all)
 ```
