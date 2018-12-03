@@ -16,7 +16,12 @@ conda create -n dbcan -c bioconda python3 diamond hmmer natsort fraggenescan
 Alternatively, if you plan on using this program with [anvi'o](http://merenlab.org/software/anvio/), you can just run
 `conda install natsort fraggenescan` inside of your activated anvio conda environment. 
 
-Next, you'll need to activate your new dbcan or existing anvio environment, go into the `db/` folder and run:
+Next, you'll need to clone this repo locally.
+```
+git clone https://github.com/SonnenburgLab/dbCAN_meta_server.git
+```
+
+Activate your new `dbcan` or existing `anvio` environment, go into the `db/` folder of the cloned repo and run:
 ```
 bash get_and_configure_db_files.sh
 ```
