@@ -48,7 +48,7 @@ python /path/to/run_dbcan.py --cluster --gff gene_calls.gff --out_dir dbcan_outp
 ## Full pipeline from anvio:
 Anvio command:
 ```
-anvi-export-gene-calls -c CONTIGS.db -o genecalls.txt
+anvi-export-gene-calls -c CONTIGS.db -o gene_calls.txt
 anvi-get-sequences-for-gene-calls -c CONTIGS.db --get-aa-sequences -o proteins.faa
 ```
 dbCAN_meta_server commands:
