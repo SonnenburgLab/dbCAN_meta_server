@@ -8,20 +8,25 @@ dbCAN meta server analyses need several dependencies in order to run, including:
 - [HMMER](http://hmmer.org)
 - [natsort](https://natsort.readthedocs.io)
 - [fraggenescan](https://sourceforge.net/projects/fraggenescan/)
-One way to get all of the dependencies is to create a new conda environment.  
+One way to get all of the dependencies is to create and then activate new conda environment.  
 ```
 conda create -n dbcan -c bioconda python3 diamond hmmer natsort fraggenescan
+conda activate dbcan
 ```
 
-Alternatively, if you plan on using this program with [anvi'o](http://merenlab.org/software/anvio/), you can just run
-`conda install natsort fraggenescan` inside of your activated anvio conda environment. 
+Alternatively, if you plan on using this program with [anvi'o](http://merenlab.org/software/anvio/), you can just activate that environment (we'll assume it's called `anvio5`) and then install packages required for dbcan inside there. For example:
+```
+conda activate anvio5
+conda install natsort fraggenescan
+```
 
-Next, you'll need to clone this repo locally.
+Next, you'll need to clone this dbCAN_meta_server repo locally, and navigate to the `db` directory inside.
 ```
 git clone https://github.com/SonnenburgLab/dbCAN_meta_server.git
+cd dbCAN_meta_server/db
 ```
 
-Activate your new `dbcan` or existing `anvio` environment, go into the `db/` folder of the cloned repo and run:
+With your chosen conda environment still active, and within the `dbCAN_meta_server/db` folder, run:
 ```
 bash get_and_configure_db_files.sh
 ```
