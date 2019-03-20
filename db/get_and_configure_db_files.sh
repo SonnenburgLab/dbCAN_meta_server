@@ -6,10 +6,10 @@
 # You'll need to have diamond and hmmer in your PATH or
 # in an active conda environment
 
-wget http://cys.bios.niu.edu/dbCAN2/download/CAZyDB.07312018.fa
-wget http://cys.bios.niu.edu/dbCAN2/download/dbCAN-HMMdb-V7.txt
-wget http://cys.bios.niu.edu/dbCAN2/download/Databases/tcdb.fa
-wget http://cys.bios.niu.edu/dbCAN2/download/Databases/tf.fa
+wget http://bcb.unl.edu/dbCAN2/download/CAZyDB.07312018.fa
+wget http://bcb.unl.edu/dbCAN2/download/dbCAN-HMMdb-V7.txt
+wget http://bcb.unl.edu/dbCAN2/download/Databases/tcdb.fa
+wget http://bcb.unl.edu/dbCAN2/download/Databases/tf.fa
 
 diamond makedb --in CAZyDB.07312018.fa --db CAZy
 diamond makedb --in tcdb.fa --db tcdb
