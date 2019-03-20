@@ -1,5 +1,5 @@
 # dbCAN_meta_server
-This repo contains code obtained from http://cys.bios.niu.edu/dbCAN2/download/
+This repo contains code obtained from http://bcb.unl.edu/dbCAN2/download/
 
 SignalP is not included here. See http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?signalp.
 ## Setup
