@@ -7,4 +7,4 @@ python /LAB_DATA/DATABASES/dbCAN_meta_server/anvi-script-convert-genecalls-to-gf
 python /LAB_DATA/DATABASES/dbCAN_meta_server/run_dbcan.py --cluster --gff ${name}.gene_calls.txt --out_dir ${name} --out_pre ${name}_ ${name}.proteins.txt protein
 python /LAB_DATA/DATABASES/dbCAN_meta_server/generate_dbCAN_consensus_and_counts.py ${name} --out_pre ${name}_ --min_tools 2
 python /LAB_DATA/DATABASES/dbCAN_meta_server/anvi-script-convert-dbCAN-to-functions.py ${name} --out_pre ${name}_
-anvi-import-functions -c $contigs -i ${name}/${name}_dbcan_functions_default.txt
+anvi-import-functions -c $contigs -i ${name}/dbcan_functions_default.txt
