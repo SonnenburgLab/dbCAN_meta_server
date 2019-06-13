@@ -10,7 +10,7 @@ dbCAN meta server analyses need several dependencies in order to run, including:
 - [fraggenescan](https://sourceforge.net/projects/fraggenescan/)
 One way to get all of the dependencies is to create and then activate new conda environment.  
 ```
-conda create -n dbcan -c bioconda python3 diamond hmmer natsort fraggenescan
+conda create -n dbcan -c bioconda diamond hmmer natsort fraggenescan
 conda activate dbcan
 ```
 
