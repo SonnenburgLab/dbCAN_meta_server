@@ -4,7 +4,7 @@
 # genome name is first argument
 genome=$1
 # strip everything down to genome name after last backslash and strip .fna extension
-name=`echo $genome | sed 's:.*/::' | sed 's/.fa.gz//'`
+name=`echo $genome | sed 's:.*/::' | sed 's/.fa//'`
 
 # run dbcan on genome
 python /LAB_DATA/DATABASES/dbCAN_meta_server/run_dbcan.py --cluster --out_dir ${name} --out_pre ${name}_ ${genome} prok
