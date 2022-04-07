@@ -1,7 +1,7 @@
 # dbCAN_meta_server
 This repo contains code obtained from http://bcb.unl.edu/dbCAN2/download/
 
-SignalP is not included here. See http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?signalp.
+SignalP is not included here. See https://services.healthtech.dtu.dk/service.php?SignalP-6.0.
 ## Setup
 dbCAN meta server analyses need several dependencies in order to run, including:
 - [Diamond](https://github.com/bbuchfink/diamond)
@@ -10,7 +10,7 @@ dbCAN meta server analyses need several dependencies in order to run, including:
 - [fraggenescan](https://sourceforge.net/projects/fraggenescan/)
 One way to get all of the dependencies is to create and then activate new conda environment.  
 ```
-conda create -n dbcan -c bioconda diamond hmmer prodigal natsort fraggenescan 
+conda create -n dbcan -c bioconda diamond hmmer prodigal natsort fraggenescan perl-bioperl
 conda activate dbcan
 ```
 
