@@ -184,7 +184,7 @@ if __name__ == "__main__":
 		print("HMMER complete")
 
 		call('python '+toolsDir+'hmmsearch-parser.py '+outDir+prefix+'h.out '+str(args.hmm_eval)+' '+str(args.hmm_cov)+' > '+outDir+prefix+'hmmer.out', shell=True)
-		# call(['rm', outDir+prefix+'h.out'])
+		call(['rm', outDir+prefix+'h.out'])
 
 	# End Core Tools
 	########################
