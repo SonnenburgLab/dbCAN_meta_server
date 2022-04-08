@@ -144,7 +144,7 @@ if __name__ == "__main__":
 		else:
 			diamond = Popen(['diamond', 'blastp', '-d', dbDir+'CAZy.dmnd', '-e', str(args.dia_eval), '-q', outDir+prefix+'uniInput', '-k', '1', '-p', str(args.dia_cpu), '-o', outDir+prefix+'diamond.out', '-f', '6', '--quiet'])
 	if tools[1]:
-		hmmer = Popen(['hmmsearch', '--domtblout', outDir+prefix+'h.out', '--cpu', str(args.hmm_cpu), '-o', '/dev/null', dbDir+'dbCAN.txt', outDir+prefix+'uniInput'])
+		hmmer = Popen(['hmmsearch', '--domtblout', outDir+prefix+'h.out', '--cpu', str(args.hmm_cpu-1), '-o', '/dev/null', dbDir+'dbCAN.txt', outDir+prefix+'uniInput'])
 
 	if tools[2]:
 		count = int(check_output("tr -cd '>' < "+outDir+prefix+"uniInput | wc -c", shell=True))    #number of genes in input file
@@ -482,10 +482,13 @@ if __name__ == "__main__":
 		row = arr_sigp[i].split()
 		sigp_genes[row[0]]=row[2]
 
-	if (hotpep_genes[len(hotpep_genes)-1] == None):
-		hotpep_genes.pop()
-		hmmer_genes.pop()
-		diamond_genes.pop()
+	try:
+		if (hotpep_genes[len(hotpep_genes)-1] == None):
+			hotpep_genes.pop()
+			hmmer_genes.pop()
+			diamond_genes.pop()
+	except:
+		pass
 	# remove duplicates from input lists
 	diamond_genes = unique(diamond_genes)
 	hmmer_genes = unique(hmmer_genes)
